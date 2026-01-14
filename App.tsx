@@ -11,28 +11,40 @@ import {
   SafeAreaProvider,
   useSafeAreaInsets,
 } from 'react-native-safe-area-context';
+import { NavigationContainer } from '@react-navigation/native';
+import { AuthProvider } from './src/context/AuthContext';
+import { RootNavigator } from './src/navigation/RootNavigator';
+import Toast from 'react-native-toast-message';
+import { useSupabaseDeepLinkHandler } from './src/hooks/useSupabaseDeepLinkHandler';
+import { navigationRef } from './src/navigation/NavigationRef';
 
+const linking = {
+  prefixes: ["authflow://"],
+  config: {
+    screens: {
+      ResetPassword: "reset-password",
+    },
+  },
+};
 function App() {
-  const isDarkMode = useColorScheme() === 'dark';
 
-  return (
-    <SafeAreaProvider>
-      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <AppContent />
-    </SafeAreaProvider>
-  );
+  return <AuthProvider>
+    <AppContent />
+  </AuthProvider>;
 }
 
 function AppContent() {
-  const safeAreaInsets = useSafeAreaInsets();
-
+  const isDarkMode = useColorScheme() === 'dark';
+  useSupabaseDeepLinkHandler();
   return (
-    <View style={styles.container}>
-      <NewAppScreen
-        templateFileName="App.tsx"
-        safeAreaInsets={safeAreaInsets}
-      />
-    </View>
+    <SafeAreaProvider>
+      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
+      <NavigationContainer ref={navigationRef} linking={linking}>
+        <RootNavigator />
+        <Toast />
+      </NavigationContainer>
+    </SafeAreaProvider>
+
   );
 }
 
